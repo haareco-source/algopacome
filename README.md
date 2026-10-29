@@ -29,7 +29,7 @@ supabase/
 
 1. Crear un proyecto en [Supabase](https://supabase.com) (región São Paulo).
 2. Ingreso (ver el documento "Algopacome: cómo ingresan los usuarios"):
-   - **Email:** el correo por defecto de Supabase no sirve en proyectos gratis nuevos. Configurar un SMTP propio (Brevo, gratis) en **Authentication > Emails > SMTP Settings** y agregar `{{ .Token }}` a la plantilla **Magic Link**.
+   - **Email:** el correo por defecto de Supabase no sirve en proyectos gratis nuevos. Configurar un SMTP propio (Brevo, gratis) en **Authentication > Emails > SMTP Settings** y agregar `{{ .Token }}` a las plantillas **Confirm signup** (primer ingreso) y **Magic Link** (ingresos siguientes).
    - **Google:** crear credenciales OAuth *Web* y *Android* en Google Cloud, activar Google en **Authentication > Sign In / Providers** con la credencial Web y poner su ID en `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`. No funciona en Expo Go: se prueba con la versión instalable de EAS.
    - **SMS** (opcional): proveedor pago en **Phone** y `EXPO_PUBLIC_LOGIN_METHOD=sms`.
 3. Aplicar las migraciones:
