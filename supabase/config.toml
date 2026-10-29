@@ -7,3 +7,7 @@ site_url = "algopacome://"
 [auth.sms]
 enable_signup = true
 enable_confirmations = true
+
+[auth.email]
+enable_signup = true
+otp_length = 6

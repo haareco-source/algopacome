@@ -14,7 +14,7 @@ La especificación completa (módulos, pantallas, modelo de datos, estados de pe
 
 ```
 src/app/            pantallas (cada archivo es una ruta de Expo Router)
-  (auth)/           ingreso con celular y código SMS
+  (auth)/           ingreso con código por email o SMS
   bienvenida.tsx    nombre y aceptación de las reglas de convivencia
   (tabs)/           inicio, pedidos y perfil
 src/components/     componentes reutilizables
@@ -28,7 +28,8 @@ supabase/
 ## Puesta en marcha
 
 1. Crear un proyecto en [Supabase](https://supabase.com) (región São Paulo).
-2. En **Authentication > Providers > Phone**, activar el ingreso por teléfono y cargar un proveedor de SMS (Twilio, MessageBird o Vonage).
+2. Ingreso: por defecto la app usa un código por **email**. En **Authentication > Emails > Magic Link**, agregar `{{ .Token }}` al cuerpo del mail para que llegue el código. El email gratuito de Supabase manda pocos mails por hora: alcanza para probar.
+   Para ingresar por **SMS**, activar **Authentication > Sign In / Providers > Phone** con un proveedor (Twilio necesita cuenta paga) y poner `EXPO_PUBLIC_LOGIN_METHOD=sms` en `.env.local`.
 3. Aplicar las migraciones:
    ```bash
    npx supabase login
