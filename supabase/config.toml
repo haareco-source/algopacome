@@ -1,0 +1,9 @@
+# Configuración mínima del CLI de Supabase (npx supabase ...). El resto usa los valores por defecto.
+project_id = "algopacome"
+
+[auth]
+site_url = "algopacome://"
+
+[auth.sms]
+enable_signup = true
+enable_confirmations = true
