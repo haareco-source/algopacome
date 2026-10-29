@@ -4,6 +4,7 @@
   "main": "expo-router/entry",
   "dependencies": {
     "@expo/ui": "~58.0.25",
+    "@react-native-google-signin/google-signin": "^16.2.0",
     "@supabase/supabase-js": "^2.118.0",
     "expo": "~58.0.21",
     "expo-constants": "~58.0.14",
@@ -37,11 +38,11 @@
   },
   "scripts": {
     "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "test:db": "scripts/probar-db.sh"
   },
   "private": true
 }

@@ -7,14 +7,14 @@ La especificación completa (módulos, pantallas, modelo de datos, estados de pe
 ## Tecnología
 
 - **App:** Expo SDK 58 (React Native, TypeScript, Expo Router). Android primero.
-- **Backend:** Supabase (Postgres con RLS, Auth por SMS, Storage, Realtime, Edge Functions).
+- **Backend:** Supabase (Postgres con RLS, Auth con Google y código por email, Storage, Realtime, Edge Functions).
 - **Pagos:** Mercado Pago Marketplace con comisión automática (semana 5).
 
 ## Estructura
 
 ```
 src/app/            pantallas (cada archivo es una ruta de Expo Router)
-  (auth)/           ingreso con código por email o SMS
+  (auth)/           ingreso con Google o código por email (SMS opcional)
   bienvenida.tsx    nombre y aceptación de las reglas de convivencia
   (tabs)/           inicio, pedidos y perfil
 src/components/     componentes reutilizables
@@ -28,8 +28,10 @@ supabase/
 ## Puesta en marcha
 
 1. Crear un proyecto en [Supabase](https://supabase.com) (región São Paulo).
-2. Ingreso: por defecto la app usa un código por **email**. En **Authentication > Emails > Magic Link**, agregar `{{ .Token }}` al cuerpo del mail para que llegue el código. El email gratuito de Supabase manda pocos mails por hora: alcanza para probar.
-   Para ingresar por **SMS**, activar **Authentication > Sign In / Providers > Phone** con un proveedor (Twilio necesita cuenta paga) y poner `EXPO_PUBLIC_LOGIN_METHOD=sms` en `.env.local`.
+2. Ingreso (ver el documento "Algopacome: cómo ingresan los usuarios"):
+   - **Email:** el correo por defecto de Supabase no sirve en proyectos gratis nuevos. Configurar un SMTP propio (Brevo, gratis) en **Authentication > Emails > SMTP Settings** y agregar `{{ .Token }}` a la plantilla **Magic Link**.
+   - **Google:** crear credenciales OAuth *Web* y *Android* en Google Cloud, activar Google en **Authentication > Sign In / Providers** con la credencial Web y poner su ID en `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`. No funciona en Expo Go: se prueba con la versión instalable de EAS.
+   - **SMS** (opcional): proveedor pago en **Phone** y `EXPO_PUBLIC_LOGIN_METHOD=sms`.
 3. Aplicar las migraciones:
    ```bash
    npx supabase login
@@ -43,6 +45,12 @@ supabase/
    npx expo start
    ```
    Abrirla en un Android con Expo Go escaneando el código QR.
+6. Versión instalable para Android (necesaria para Google), con una cuenta gratis de expo.dev:
+   ```bash
+   npx eas-cli@latest login
+   npx eas-cli@latest build --profile preview --platform android
+   ```
+   Al terminar, EAS da un link para descargar el APK e instalarlo en el celular. Las claves públicas de cada perfil están en `eas.json`.
 
 Para darle rol de moderador a alguien, en el editor SQL de Supabase:
 

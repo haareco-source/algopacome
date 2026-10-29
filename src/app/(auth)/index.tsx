@@ -5,6 +5,7 @@ import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
+import { isGoogleSignInAvailable, signInWithGoogle } from '@/lib/google';
 import { isValidEmail, LOGIN_METHOD } from '@/lib/login-method';
 import { normalizeArgentinePhone } from '@/lib/phone';
 import { supabase } from '@/lib/supabase';
@@ -13,7 +14,23 @@ export default function SignInScreen() {
   const isEmail = LOGIN_METHOD === 'email';
   const [input, setInput] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [googleError, setGoogleError] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  async function continueWithGoogle() {
+    setGoogleError(null);
+    setIsGoogleLoading(true);
+    try {
+      // Si sale bien, el cambio de sesión lleva solo a la bienvenida o a la app.
+      await signInWithGoogle();
+    } catch (googleSignInError) {
+      console.warn('Error al ingresar con Google', googleSignInError);
+      setGoogleError('No pudimos ingresar con Google. Probá de nuevo o usá tu email.');
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  }
 
   async function sendCode() {
     if (isEmail) {
@@ -49,11 +66,26 @@ export default function SignInScreen() {
   return (
     <Screen>
       <ThemedText type="subtitle">Algopacome</ThemedText>
-      <ThemedText themeColor="textSecondary">
-        {isEmail
-          ? 'La comida rápida de tu barrio. Ingresá con tu email y te mandamos un código.'
-          : 'La comida rápida de tu barrio. Ingresá con tu celular y te mandamos un código por SMS.'}
-      </ThemedText>
+      <ThemedText themeColor="textSecondary">La comida rápida de tu barrio.</ThemedText>
+
+      {isGoogleSignInAvailable ? (
+        <>
+          <Button title="Continuar con Google" onPress={continueWithGoogle} loading={isGoogleLoading} />
+          {googleError ? (
+            <ThemedText type="small" themeColor="textSecondary">
+              {googleError}
+            </ThemedText>
+          ) : null}
+          <ThemedText type="small" themeColor="textSecondary">
+            {isEmail ? 'O ingresá con tu email y te mandamos un código.' : 'O ingresá con tu celular y te mandamos un código por SMS.'}
+          </ThemedText>
+        </>
+      ) : (
+        <ThemedText type="small" themeColor="textSecondary">
+          {isEmail ? 'Ingresá con tu email y te mandamos un código.' : 'Ingresá con tu celular y te mandamos un código por SMS.'}
+        </ThemedText>
+      )}
+
       {isEmail ? (
         <TextField
           label="Tu email"
@@ -80,7 +112,12 @@ export default function SignInScreen() {
           error={error}
         />
       )}
-      <Button title="Enviarme el código" onPress={sendCode} loading={isSending} />
+      <Button
+        title="Enviarme el código"
+        variant={isGoogleSignInAvailable ? 'secondary' : 'primary'}
+        onPress={sendCode}
+        loading={isSending}
+      />
     </Screen>
   );
 }

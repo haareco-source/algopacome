@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useState, type PropsWithChildren } from 'react';
 
+import { signOutOfGoogle } from '@/lib/google';
 import { supabase } from '@/lib/supabase';
 import type { Profile } from '@/lib/types';
 
@@ -52,6 +53,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
+    await signOutOfGoogle().catch(() => undefined);
   }, []);
 
   return (
