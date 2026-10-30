@@ -8,7 +8,7 @@ export default function HomeScreen() {
 
   return (
     <Screen>
-      <ThemedText type="subtitle">Hola, {profile?.display_name.split(' ')[0]}</ThemedText>
+      <ThemedText type="subtitle">Hola, {profile?.display_name}</ThemedText>
       <ThemedText themeColor="textSecondary">¿Qué tenés ganas de comer hoy?</ThemedText>
       <ThemedText type="small" themeColor="textSecondary">
         Pronto vas a poder buscar sanguches, lomitos, pizzas y más de los puestos de tu barrio.
