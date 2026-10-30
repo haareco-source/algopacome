@@ -26,7 +26,12 @@ export default function SignInScreen() {
       await signInWithGoogle();
     } catch (googleSignInError) {
       console.warn('Error al ingresar con Google', googleSignInError);
-      setGoogleError('No pudimos ingresar con Google. Probá de nuevo o usá tu email.');
+      // El detalle (código de Google o mensaje de Supabase) ayuda a diagnosticar en el piloto.
+      const detail =
+        googleSignInError && typeof googleSignInError === 'object'
+          ? String((googleSignInError as { code?: unknown }).code ?? (googleSignInError as { message?: unknown }).message ?? '')
+          : '';
+      setGoogleError(`No pudimos ingresar con Google. Probá de nuevo o usá tu email.${detail ? ` (${detail})` : ''}`);
     } finally {
       setIsGoogleLoading(false);
     }
