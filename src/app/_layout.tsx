@@ -4,6 +4,7 @@ import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { AuthProvider, useAuth } from '@/providers/auth';
+import { MyBusinessProvider } from '@/providers/my-business';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -12,7 +13,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AuthProvider>
-        <RootNavigator />
+        <MyBusinessProvider>
+          <RootNavigator />
+        </MyBusinessProvider>
       </AuthProvider>
     </ThemeProvider>
   );
@@ -40,6 +43,7 @@ function RootNavigator() {
         <Stack.Protected guard={isSignedIn && isProfileComplete}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="reglas" />
+          <Stack.Screen name="vender" />
         </Stack.Protected>
       </Stack>
       <AnimatedSplashOverlay />

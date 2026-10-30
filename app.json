@@ -35,7 +35,21 @@
           "imageWidth": 120
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Algopacome usa tus fotos para el logo, la portada y los productos de tu negocio.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Algopacome usa tu ubicación para marcar dónde está tu negocio."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
