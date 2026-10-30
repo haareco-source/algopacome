@@ -1,32 +1,39 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://unistyl.es/), etc.
- */
-
 import '@/global.css';
 
 import { Platform } from 'react-native';
 
+// Marca Algopacome: naranja (acción principal), verde (abierto, confirmaciones, novedades),
+// blanco y negro de base.
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
-    primary: '#E8590C',
-    onPrimary: '#ffffff',
-    danger: '#C92A2A',
+    text: '#111111',
+    background: '#FFFFFF',
+    backgroundElement: '#F4F4F5',
+    backgroundSelected: '#E4E4E7',
+    border: '#E4E4E7',
+    textSecondary: '#6B6B70',
+    primary: '#FF6B00',
+    primarySoft: '#FFF1E6',
+    onPrimary: '#FFFFFF',
+    accent: '#16A34A',
+    accentSoft: '#E8F7EE',
+    onAccent: '#FFFFFF',
+    danger: '#DC2626',
   },
   dark: {
-    text: '#ffffff',
+    text: '#FFFFFF',
     background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
-    primary: '#FF8A3D',
-    onPrimary: '#1A1A1A',
-    danger: '#FF6B6B',
+    backgroundElement: '#1C1C1E',
+    backgroundSelected: '#2C2C2E',
+    border: '#2C2C2E',
+    textSecondary: '#A1A1AA',
+    primary: '#FF7A1A',
+    primarySoft: '#3A1E08',
+    onPrimary: '#FFFFFF',
+    accent: '#22C55E',
+    accentSoft: '#0F2E1A',
+    onAccent: '#000000',
+    danger: '#F87171',
   },
 } as const;
 
@@ -69,3 +76,4 @@ export const Spacing = {
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
+export const Radius = { card: 16, pill: 999 } as const;

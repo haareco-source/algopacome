@@ -1,19 +1,28 @@
+import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, type PressableProps } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 type ButtonProps = PressableProps & {
   title: string;
-  variant?: 'primary' | 'secondary';
+  // primary: naranja, la acción principal. accent: verde. outline: blanco con borde. ghost: solo texto.
+  variant?: 'primary' | 'accent' | 'outline' | 'ghost';
+  icon?: ReactNode;
   loading?: boolean;
 };
 
-export function Button({ title, variant = 'primary', loading = false, disabled, style, ...rest }: ButtonProps) {
+export function Button({ title, variant = 'primary', icon, loading = false, disabled, style, ...rest }: ButtonProps) {
   const theme = useTheme();
-  const isPrimary = variant === 'primary';
   const isDisabled = disabled || loading;
+
+  const colors = {
+    primary: { background: theme.primary, text: theme.onPrimary, border: theme.primary },
+    accent: { background: theme.accent, text: theme.onAccent, border: theme.accent },
+    outline: { background: theme.background, text: theme.text, border: theme.text },
+    ghost: { background: 'transparent', text: theme.text, border: 'transparent' },
+  }[variant];
 
   return (
     <Pressable
@@ -21,17 +30,20 @@ export function Button({ title, variant = 'primary', loading = false, disabled, 
       disabled={isDisabled}
       style={(state) => [
         styles.button,
-        { backgroundColor: isPrimary ? theme.primary : theme.backgroundElement },
+        { backgroundColor: colors.background, borderColor: colors.border },
         (state.pressed || isDisabled) && styles.dimmed,
         typeof style === 'function' ? style(state) : style,
       ]}
       {...rest}>
       {loading ? (
-        <ActivityIndicator color={isPrimary ? theme.onPrimary : theme.text} />
+        <ActivityIndicator color={colors.text} />
       ) : (
-        <ThemedText type="smallBold" style={{ color: isPrimary ? theme.onPrimary : theme.text }}>
-          {title}
-        </ThemedText>
+        <>
+          {icon}
+          <ThemedText type="defaultBold" style={{ color: colors.text }}>
+            {title}
+          </ThemedText>
+        </>
       )}
     </Pressable>
   );
@@ -39,10 +51,13 @@ export function Button({ title, variant = 'primary', loading = false, disabled, 
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: 48,
-    borderRadius: 12,
+    minHeight: 52,
+    borderRadius: Radius.pill,
+    borderWidth: 1.5,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: Spacing.three,
     paddingHorizontal: Spacing.four,
   },
   dimmed: {

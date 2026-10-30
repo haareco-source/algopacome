@@ -18,7 +18,7 @@ export default function RootLayout() {
   );
 }
 
-// Sin sesión: ingreso con teléfono. Con sesión y sin aceptar las reglas: bienvenida.
+// Sin sesión: ingreso con Google o código. Con sesión y sin aceptar las reglas: bienvenida.
 // Con todo completo: la app.
 function RootNavigator() {
   const { session, profile, isLoading } = useAuth();
@@ -39,6 +39,7 @@ function RootNavigator() {
         </Stack.Protected>
         <Stack.Protected guard={isSignedIn && isProfileComplete}>
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="reglas" />
         </Stack.Protected>
       </Stack>
       <AnimatedSplashOverlay />
