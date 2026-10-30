@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, StyleSheet, View } from 'react-native';
 
 import { BackHeader } from '@/components/back-header';
@@ -23,6 +23,7 @@ import {
   STATUS_LABELS,
   trackingSteps,
 } from '@/lib/orders';
+import { mercadoPagoLink, openMercadoPago } from '@/lib/payments';
 import { supabase } from '@/lib/supabase';
 import type { Order, OrderStatus } from '@/lib/types';
 import { useMyBusiness } from '@/providers/my-business';
@@ -44,14 +45,35 @@ async function loadOrder(id: string): Promise<OrderData> {
 // Detalle y seguimiento en vivo de un pedido. El cliente lo sigue; el vendedor lo avanza.
 export default function OrderScreen() {
   const theme = useTheme();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, pagar } = useLocalSearchParams<{ id: string; pagar?: string }>();
   const { business: myBusiness } = useMyBusiness();
   const { refresh: refreshSellerOrders } = useSellerOrders();
   const [data, setData] = useState<OrderData | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<OrderStatus | null>(null);
 
+  const [isPaying, setIsPaying] = useState(false);
+  // Al venir del carrito con Mercado Pago, la pantalla de pago se abre sola una vez.
+  const autoPay = useRef(pagar === '1');
+
   const reload = useCallback(async () => setData(await loadOrder(id)), [id]);
+
+  const pay = useCallback(async () => {
+    setError(null);
+    setIsPaying(true);
+    const { url, error: payError } = await mercadoPagoLink('pagar', { order_id: id });
+    if (url) await openMercadoPago(url);
+    else setError(payError);
+    setIsPaying(false);
+    await reload();
+  }, [id, reload]);
+
+  useEffect(() => {
+    if (autoPay.current && data?.order?.status === 'awaiting_payment') {
+      autoPay.current = false;
+      pay();
+    }
+  }, [data, pay]);
 
   useEffect(() => {
     let active = true;
@@ -157,6 +179,20 @@ export default function OrderScreen() {
       onPress={() => changeStatus('delivered')}
       loading={pending === 'delivered'}
     />
+  ) : order.status === 'awaiting_payment' && !isSeller ? (
+    <View style={styles.footer}>
+      <Button title="Pagar con Mercado Pago" variant="accent" onPress={pay} loading={isPaying} />
+      <Button
+        title="Cancelar pedido"
+        variant="ghost"
+        onPress={() =>
+          confirmAction('Cancelar pedido', '¿Seguro que no lo querés?', 'Cancelar pedido', () =>
+            changeStatus('cancelled'),
+          )
+        }
+        loading={pending === 'cancelled'}
+      />
+    </View>
   ) : customerCanCancel ? (
     <Button
       title="Cancelar pedido"
@@ -192,6 +228,17 @@ export default function OrderScreen() {
           <Icon sf="clock" md="schedule" size={22} color={theme.primary} />
           <ThemedText type="defaultBold" style={styles.flex}>
             Programado para las {formatTime(order.scheduled_for)}
+          </ThemedText>
+        </View>
+      ) : null}
+
+      {order.status === 'awaiting_payment' ? (
+        <View style={[styles.notice, { backgroundColor: theme.primarySoft }]}>
+          <Icon sf="creditcard" md="credit_card" size={22} color={theme.primary} />
+          <ThemedText type="small" style={styles.flex}>
+            {isSeller
+              ? 'El cliente todavía no pagó. Te avisamos cuando se acredite.'
+              : 'Tu pedido le llega al negocio cuando se acredita el pago. Si no pagás en 30 minutos, se cancela solo.'}
           </ThemedText>
         </View>
       ) : null}

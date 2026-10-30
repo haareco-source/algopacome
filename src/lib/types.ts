@@ -77,6 +77,8 @@ export type Product = {
   photo_path: string | null;
   is_available: boolean;
   status: 'active' | 'hidden';
+  // Oculto por el plan o por el dueño: lo puede volver a mostrar (dentro de su límite).
+  hidden_by_plan: boolean;
 };
 
 export type OrderStatus =
