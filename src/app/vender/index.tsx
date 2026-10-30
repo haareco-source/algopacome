@@ -9,7 +9,7 @@ import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { BUSINESS_TYPES, formatUnitPrice, friendlyError } from '@/lib/business';
+import { BUSINESS_TYPES, formatUnitPrice, friendlyError, sellerOpenStatus } from '@/lib/business';
 import { publicUrl } from '@/lib/media';
 import { supabase } from '@/lib/supabase';
 import type { Product } from '@/lib/types';
@@ -42,6 +42,7 @@ export default function SellerHomeScreen() {
   const atLimit = activeProducts.length >= productLimit;
   const typeInfo = BUSINESS_TYPES.find((option) => option.value === business.type);
   const logo = publicUrl('business-media', business.logo_path);
+  const openStatus = sellerOpenStatus(business, hours);
 
   async function toggleOpen(isOpen: boolean) {
     setMessage(null);
@@ -93,13 +94,11 @@ export default function SellerHomeScreen() {
             </View>
           </View>
           <View style={[styles.openCard, { backgroundColor: theme.background }]}>
-            <View style={[styles.dot, { backgroundColor: business.is_open_now ? theme.accent : theme.textSecondary }]} />
+            <View style={[styles.dot, { backgroundColor: openStatus.isOpen ? theme.accent : theme.textSecondary }]} />
             <View style={styles.flex}>
-              <ThemedText type="defaultBold">{business.is_open_now ? 'Abierto ahora' : 'Cerrado ahora'}</ThemedText>
+              <ThemedText type="defaultBold">{openStatus.title}</ThemedText>
               <ThemedText type="small" themeColor="textSecondary">
-                {business.is_open_now
-                  ? 'Recibís pedidos dentro de tus horarios.'
-                  : 'Prendelo cuando empieces a atender.'}
+                {openStatus.detail}
               </ThemedText>
             </View>
             <Switch

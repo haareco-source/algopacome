@@ -9,7 +9,7 @@ import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { friendlyError, nameWithUnit } from '@/lib/business';
+import { friendlyError, nameWithUnit, sellerOpenStatus } from '@/lib/business';
 import { isFinished, localDay, minutesLeft, sellerNextStep } from '@/lib/orders';
 import { supabase } from '@/lib/supabase';
 import type { Order } from '@/lib/types';
@@ -19,7 +19,7 @@ import { useSellerOrders } from '@/providers/seller-orders';
 // Pestaña del vendedor: pedidos para aceptar, en curso, agenda de programados y terminados.
 export default function SellerOrdersScreen() {
   const theme = useTheme();
-  const { business, refresh: refreshBusiness } = useMyBusiness();
+  const { business, hours, refresh: refreshBusiness } = useMyBusiness();
   const { orders, customerNames, isLoading, refresh } = useSellerOrders();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +33,7 @@ export default function SellerOrdersScreen() {
     );
   }
 
+  const openStatus = sellerOpenStatus(business, hours);
   const today = localDay(new Date());
   const toAccept = orders.filter((order) => order.status === 'new');
   const inProgress = orders
@@ -80,9 +81,14 @@ export default function SellerOrdersScreen() {
               {business.name}
             </ThemedText>
             <ThemedText type="small" style={{ color: theme.onPrimary }}>
-              {business.is_open_now ? 'Abierto: recibís pedidos' : 'Cerrado'}
+              {openStatus.title}
               {business.accepts_scheduled ? ' · Tomás programados' : ''}
             </ThemedText>
+            {business.is_open_now && !openStatus.isOpen ? (
+              <ThemedText type="small" style={{ color: theme.onPrimary }}>
+                {openStatus.detail}
+              </ThemedText>
+            ) : null}
           </View>
           <Switch
             accessibilityLabel="Abierto ahora"
@@ -190,9 +196,7 @@ export default function SellerOrdersScreen() {
             No tenés pedidos pendientes
           </ThemedText>
           <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
-            {business.is_open_now
-              ? 'Cuando entre uno te avisamos con una notificación.'
-              : 'Prendé "Abierto" cuando empieces a atender para recibir pedidos.'}
+            {openStatus.isOpen ? 'Cuando entre uno te avisamos con una notificación.' : openStatus.detail}
           </ThemedText>
         </View>
       ) : null}

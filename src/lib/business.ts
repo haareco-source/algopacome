@@ -1,5 +1,5 @@
 import type { DeliveryForm } from '@/components/delivery-editor';
-import type { BusinessHour, BusinessType, DeliverySettings, SaleUnit } from '@/lib/types';
+import type { Business, BusinessHour, BusinessType, DeliverySettings, SaleUnit } from '@/lib/types';
 
 export const BUSINESS_TYPES: { value: BusinessType; label: string; emoji: string }[] = [
   { value: 'puesto', label: 'Puesto', emoji: '🏕️' },
@@ -94,6 +94,29 @@ export function parsePrice(value: string): number | null {
   const normalized = value.replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '');
   const price = Number(normalized);
   return normalized && Number.isFinite(price) && price > 0 ? price : null;
+}
+
+// Estado de atención para el vendedor: distingue "prendido" de "abierto para los clientes".
+export function sellerOpenStatus(business: Pick<Business, 'is_open_now' | 'is_open_for_customers'>, hours: BusinessHour[]) {
+  if (!business.is_open_now) {
+    return { isOpen: false, title: 'Cerrado ahora', detail: 'Prendelo cuando empieces a atender.' };
+  }
+  if (business.is_open_for_customers) {
+    return { isOpen: true, title: 'Abierto ahora', detail: 'Los clientes te ven abierto y pueden pedirte.' };
+  }
+  // Argentina no tiene horario de verano: el día de hoy es UTC-3.
+  const weekday = new Date(Date.now() - 3 * 60 * 60 * 1000).getUTCDay();
+  const today = hours
+    .filter((hour) => hour.weekday === weekday)
+    .map((hour) => `${hour.opens_at.slice(0, 5)} a ${hour.closes_at.slice(0, 5)}`)
+    .join(' y ');
+  return {
+    isOpen: false,
+    title: 'Prendido, pero fuera de horario',
+    detail: today
+      ? `Los clientes te ven cerrado. Hoy atendés de ${today}.`
+      : 'Los clientes te ven cerrado: hoy no tenés horario cargado.',
+  };
 }
 
 // Pasa los errores de la base a un mensaje para el vendedor.
