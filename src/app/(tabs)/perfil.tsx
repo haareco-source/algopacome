@@ -8,10 +8,12 @@ import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/providers/auth';
+import { useMyBusiness } from '@/providers/my-business';
 
 export default function ProfileScreen() {
   const theme = useTheme();
   const { session, profile, signOut } = useAuth();
+  const { business } = useMyBusiness();
   const name = profile?.display_name ?? '';
   const initials = name
     .split(' ')
@@ -39,7 +41,13 @@ export default function ProfileScreen() {
       }>
       <View style={[styles.menu, { borderColor: theme.border }]}>
         <MenuRow sf="bag" md="receipt_long" title="Mis pedidos" onPress={() => router.navigate('/pedidos')} />
-        <MenuRow sf="storefront" md="storefront" title="Quiero vender" badge="Pronto" />
+        <MenuRow
+          sf="storefront"
+          md="storefront"
+          title={business ? 'Mi negocio' : 'Quiero vender'}
+          badge={business ? undefined : 'Gratis'}
+          onPress={() => router.push(business ? '/vender' : '/vender/alta')}
+        />
         <MenuRow sf="checkmark.shield" md="verified_user" title="Reglas de convivencia" onPress={() => router.push('/reglas')} />
         <MenuRow sf="rectangle.portrait.and.arrow.right" md="logout" title="Cerrar sesión" danger onPress={signOut} last />
       </View>
