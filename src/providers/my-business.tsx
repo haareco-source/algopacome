@@ -20,7 +20,7 @@ type MyBusinessValue = {
 const MyBusinessContext = createContext<MyBusinessValue | null>(null);
 
 const BUSINESS_COLUMNS =
-  'id, owner_id, name, slug, type, description, ingredients, address, lat, lng, phone, whatsapp, logo_path, cover_path, plan, status, is_open_now, accepts_cash';
+  'id, owner_id, name, slug, type, description, ingredients, address, lat, lng, phone, whatsapp, logo_path, cover_path, plan, status, is_open_now, accepts_cash, accepts_scheduled, scheduled_daily_limit';
 
 type BusinessData = {
   business: Business | null;
@@ -40,7 +40,7 @@ async function loadBusiness(userId: string): Promise<BusinessData> {
   const [productsResult, hoursResult, deliveryResult] = await Promise.all([
     supabase
       .from('products')
-      .select('id, business_id, category_id, name, description, price, photo_path, is_available, status')
+      .select('id, business_id, category_id, name, description, price, sale_unit, photo_path, is_available, status')
       .eq('business_id', business.id)
       .order('created_at'),
     supabase.from('business_hours').select('weekday, opens_at, closes_at').eq('business_id', business.id),

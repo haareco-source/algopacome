@@ -1,4 +1,4 @@
-import type { BusinessType, DeliveryFeeMode } from '@/lib/types';
+import type { BusinessType, DeliveryFeeMode, SaleUnit } from '@/lib/types';
 
 // Filas que devuelven las funciones públicas de la base (list_businesses, get_business_profile, search_products).
 
@@ -31,6 +31,7 @@ export type BusinessProfile = BusinessCard & {
   offers_pickup: boolean;
   free_over: number | null;
   radius_km: number | null;
+  accepts_scheduled: boolean;
 };
 
 export type SearchResult = {
@@ -51,6 +52,7 @@ export type SearchResult = {
   delivery_fee: number | null;
   eta_min_minutes: number | null;
   eta_max_minutes: number | null;
+  sale_unit: SaleUnit;
 };
 
 export function formatEta(min: number | null, max: number | null) {

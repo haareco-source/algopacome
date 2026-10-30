@@ -2,10 +2,16 @@ import 'expo-sqlite/localStorage/install';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 
+import type { SaleUnit } from '@/lib/types';
+
 export type CartItem = {
   productId: string;
   name: string;
   price: number;
+  // Opcional: los carritos guardados antes de la unidad de venta no la tienen.
+  saleUnit?: SaleUnit;
+  // Aclaración del cliente ("sin mostaza"). El mismo producto con otra aclaración va en otra línea.
+  note?: string;
   photoPath: string | null;
   quantity: number;
 };
@@ -24,11 +30,16 @@ type CartValue = {
   add: (business: { id: string; name: string }, item: Omit<CartItem, 'quantity'>, quantity?: number) => boolean;
   // Vacía el carrito y empieza uno nuevo con este producto.
   replaceWith: (business: { id: string; name: string }, item: Omit<CartItem, 'quantity'>, quantity?: number) => void;
-  setQuantity: (productId: string, quantity: number) => void;
+  setQuantity: (key: string, quantity: number) => void;
   clear: () => void;
 };
 
 const STORAGE_KEY = 'algopacome.cart';
+
+// Identifica una línea del carrito: producto + aclaración.
+export function lineKey(item: Pick<CartItem, 'productId' | 'note'>) {
+  return `${item.productId}|${item.note ?? ''}`;
+}
 const CartContext = createContext<CartValue | null>(null);
 
 function readStoredCart(): Cart | null {
@@ -61,10 +72,10 @@ export function CartProvider({ children }: PropsWithChildren) {
           current && current.businessId === business.id
             ? current
             : { businessId: business.id, businessName: business.name, items: [] };
-        const existing = base.items.find((entry) => entry.productId === item.productId);
+        const existing = base.items.find((entry) => lineKey(entry) === lineKey(item));
         const items = existing
           ? base.items.map((entry) =>
-              entry.productId === item.productId ? { ...entry, ...item, quantity: entry.quantity + quantity } : entry,
+              lineKey(entry) === lineKey(item) ? { ...entry, ...item, quantity: entry.quantity + quantity } : entry,
             )
           : [...base.items, { ...item, quantity }];
         return { ...base, items };
@@ -78,13 +89,13 @@ export function CartProvider({ children }: PropsWithChildren) {
     setCart({ businessId: business.id, businessName: business.name, items: [{ ...item, quantity }] });
   }, []);
 
-  const setQuantity = useCallback((productId: string, quantity: number) => {
+  const setQuantity = useCallback((key: string, quantity: number) => {
     setCart((current) => {
       if (!current) return current;
       const items =
         quantity > 0
-          ? current.items.map((entry) => (entry.productId === productId ? { ...entry, quantity } : entry))
-          : current.items.filter((entry) => entry.productId !== productId);
+          ? current.items.map((entry) => (lineKey(entry) === key ? { ...entry, quantity } : entry))
+          : current.items.filter((entry) => lineKey(entry) !== key);
       return items.length > 0 ? { ...current, items } : null;
     });
   }, []);

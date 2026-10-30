@@ -121,6 +121,7 @@ export default function SearchScreen() {
                 name={product.product_name}
                 description={product.description}
                 price={product.price}
+                saleUnit={product.sale_unit}
                 photoPath={product.photo_path}
                 subtitle={[product.business_name, product.is_open ? eta : 'Cerrado'].filter(Boolean).join(' · ')}
                 onPress={() => router.push({ pathname: '/producto/[id]', params: { id: product.product_id } })}

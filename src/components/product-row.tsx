@@ -5,13 +5,15 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { formatPrice } from '@/lib/business';
+import { formatUnitPrice } from '@/lib/business';
 import { publicUrl } from '@/lib/media';
+import type { SaleUnit } from '@/lib/types';
 
 type ProductRowProps = {
   name: string;
   description?: string;
   price: number;
+  saleUnit?: SaleUnit;
   photoPath: string | null;
   subtitle?: string;
   right?: ReactNode;
@@ -19,7 +21,7 @@ type ProductRowProps = {
 };
 
 // Fila de producto: texto a la izquierda y foto a la derecha, como en las apps de delivery.
-export function ProductRow({ name, description, price, photoPath, subtitle, right, onPress }: ProductRowProps) {
+export function ProductRow({ name, description, price, saleUnit, photoPath, subtitle, right, onPress }: ProductRowProps) {
   const theme = useTheme();
   const photo = publicUrl('product-photos', photoPath);
 
@@ -43,7 +45,7 @@ export function ProductRow({ name, description, price, photoPath, subtitle, righ
           </ThemedText>
         ) : null}
         <ThemedText type="defaultBold" style={{ color: theme.primary }}>
-          {formatPrice(price)}
+          {formatUnitPrice(price, saleUnit)}
         </ThemedText>
       </View>
       <View style={[styles.photo, { backgroundColor: theme.primarySoft }]}>

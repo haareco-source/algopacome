@@ -49,6 +49,13 @@
         {
           "locationWhenInUsePermission": "Algopacome usa tu ubicación para marcar dónde está tu negocio."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#FF6B00"
+        }
       ]
     ],
     "experiments": {

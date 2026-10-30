@@ -130,6 +130,7 @@ export default function HomeScreen() {
                 key={product.product_id}
                 name={product.product_name}
                 price={product.price}
+                saleUnit={product.sale_unit}
                 photoPath={product.photo_path}
                 subtitle={`${product.business_name}${product.is_open ? '' : ' · Cerrado'}`}
                 onPress={() => router.push({ pathname: '/producto/[id]', params: { id: product.product_id } })}

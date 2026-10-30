@@ -19,7 +19,7 @@ import { publicUrl } from '@/lib/media';
 import { supabase } from '@/lib/supabase';
 import type { BusinessHour, Product } from '@/lib/types';
 
-type MenuProduct = Pick<Product, 'id' | 'name' | 'description' | 'price' | 'photo_path' | 'category_id' | 'is_available'>;
+type MenuProduct = Pick<Product, 'id' | 'name' | 'description' | 'price' | 'sale_unit' | 'photo_path' | 'category_id' | 'is_available'>;
 
 // Perfil público del negocio: portada, datos, horarios, entrega y menú.
 export default function BusinessScreen() {
@@ -37,7 +37,7 @@ export default function BusinessScreen() {
       supabase.rpc('get_business_profile', { p_business_id: id }).maybeSingle<BusinessProfile>(),
       supabase
         .from('products')
-        .select('id, name, description, price, photo_path, category_id, is_available')
+        .select('id, name, description, price, sale_unit, photo_path, category_id, is_available')
         .eq('business_id', id)
         .eq('status', 'active')
         .order('score', { ascending: false }),
@@ -178,6 +178,7 @@ export default function BusinessScreen() {
                     name={product.name}
                     description={product.description}
                     price={product.price}
+                    saleUnit={product.sale_unit}
                     photoPath={product.photo_path}
                     subtitle={product.is_available ? undefined : 'Sin stock por ahora'}
                     onPress={() => router.push({ pathname: '/producto/[id]', params: { id: product.id } })}

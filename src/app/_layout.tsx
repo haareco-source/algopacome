@@ -1,11 +1,14 @@
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { listenToNotificationTaps, registerForPush } from '@/lib/notifications';
 import { AuthProvider, useAuth } from '@/providers/auth';
 import { CartProvider } from '@/providers/cart';
 import { MyBusinessProvider } from '@/providers/my-business';
+import { SellerOrdersProvider } from '@/providers/seller-orders';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -15,9 +18,11 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AuthProvider>
         <MyBusinessProvider>
-          <CartProvider>
-            <RootNavigator />
-          </CartProvider>
+          <SellerOrdersProvider>
+            <CartProvider>
+              <RootNavigator />
+            </CartProvider>
+          </SellerOrdersProvider>
         </MyBusinessProvider>
       </AuthProvider>
     </ThemeProvider>
@@ -29,10 +34,19 @@ export default function RootLayout() {
 function RootNavigator() {
   const { session, profile, isLoading } = useAuth();
 
-  if (isLoading) return null;
-
   const isSignedIn = !!session;
   const isProfileComplete = !!profile?.accepted_rules_at && !!profile.display_name.trim();
+  const userId = session?.user.id;
+  const isReady = isSignedIn && isProfileComplete;
+
+  // Avisos de pedidos: se registra el teléfono al entrar y tocar un aviso abre el pedido.
+  useEffect(() => {
+    if (!isReady || !userId) return;
+    registerForPush();
+    return listenToNotificationTaps();
+  }, [isReady, userId]);
+
+  if (isLoading) return null;
 
   return (
     <>
@@ -51,6 +65,7 @@ function RootNavigator() {
           <Stack.Screen name="negocio/[id]" />
           <Stack.Screen name="producto/[id]" />
           <Stack.Screen name="carrito" />
+          <Stack.Screen name="pedido/[id]" />
         </Stack.Protected>
       </Stack>
       <AnimatedSplashOverlay />
