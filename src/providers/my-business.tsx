@@ -20,7 +20,7 @@ type MyBusinessValue = {
 const MyBusinessContext = createContext<MyBusinessValue | null>(null);
 
 const BUSINESS_COLUMNS =
-  'id, owner_id, name, slug, type, description, ingredients, address, lat, lng, phone, whatsapp, logo_path, cover_path, plan, status, is_open_now, accepts_cash';
+  'id, owner_id, name, slug, type, description, ingredients, address, lat, lng, phone, whatsapp, logo_path, cover_path, plan, status, is_open_now, accepts_cash, accepts_scheduled, scheduled_daily_limit';
 
 type BusinessData = {
   business: Business | null;

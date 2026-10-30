@@ -2,6 +2,7 @@ import type { Session } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useState, type PropsWithChildren } from 'react';
 
 import { signOutOfGoogle } from '@/lib/google';
+import { unregisterPush } from '@/lib/notifications';
 import { supabase } from '@/lib/supabase';
 import type { Profile } from '@/lib/types';
 
@@ -52,6 +53,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const refreshProfile = useCallback(() => loadProfile(session?.user.id), [loadProfile, session]);
 
   const signOut = useCallback(async () => {
+    await unregisterPush().catch(() => undefined);
     await supabase.auth.signOut();
     await signOutOfGoogle().catch(() => undefined);
   }, []);

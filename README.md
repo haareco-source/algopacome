@@ -51,6 +51,12 @@ supabase/
    npx eas-cli@latest build --profile preview --platform android
    ```
    Al terminar, EAS da un link para descargar el APK e instalarlo en el celular. Las claves públicas de cada perfil están en `eas.json`.
+7. Notificaciones de pedidos en Android: crear un proyecto en Firebase, agregar la app Android
+   `ar.com.noadigital.algopacome`, guardar su `google-services.json` en la raíz del repo y poner
+   `"googleServicesFile": "./google-services.json"` dentro de `android` en `app.json`. La clave de cuenta de servicio
+   (privada) se sube en expo.dev > proyecto > Credentials > Android > FCM V1, nunca al repo. En Supabase tienen que
+   estar las extensiones `pg_net` (manda los avisos) y `pg_cron` (vence pedidos cada minuto); la migración de la
+   semana 4 intenta activarlas.
 
 Para darle rol de moderador a alguien, en el editor SQL de Supabase:
 

@@ -31,6 +31,7 @@ export type BusinessProfile = BusinessCard & {
   offers_pickup: boolean;
   free_over: number | null;
   radius_km: number | null;
+  accepts_scheduled: boolean;
 };
 
 export type SearchResult = {

@@ -220,7 +220,7 @@ export default function SellerHomeScreen() {
         <MenuRow
           sf="clock"
           md="schedule"
-          title="Horarios y entrega"
+          title="Horarios, entrega y programados"
           onPress={() => router.push('/vender/horarios')}
           bordered
         />
