@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
+import { Icon } from '@/components/icon';
 import { Screen } from '@/components/screen';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
 import { COMMUNITY_RULES, RULES_FOOTER } from '@/constants/rules';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/auth';
@@ -42,23 +43,35 @@ export default function WelcomeScreen() {
   }
 
   return (
-    <Screen>
-      <ThemedText type="subtitle">¡Bienvenido!</ThemedText>
+    <Screen
+      header={
+        <>
+          <ThemedText type="subtitle" style={{ color: theme.onPrimary }}>
+            ¡Bienvenido a Algopacome! 👋
+          </ThemedText>
+          <ThemedText style={{ color: theme.onPrimary }}>
+            Ya casi estás. Contanos tu nombre y aceptá las reglas del barrio.
+          </ThemedText>
+        </>
+      }>
       <TextField
         label="Tu nombre"
-        placeholder="Como querés que te vean los vendedores"
+        placeholder="Ej.: Juan Pérez"
         autoComplete="name"
         value={name}
         onChangeText={setName}
         error={error}
       />
 
-      <View style={[styles.rules, { backgroundColor: theme.backgroundElement }]}>
-        <ThemedText type="smallBold">Reglas de convivencia</ThemedText>
-        {COMMUNITY_RULES.map((rule, index) => (
-          <ThemedText key={rule} type="small">
-            {index + 1}. {rule}
-          </ThemedText>
+      <View style={[styles.rules, { borderColor: theme.border }]}>
+        <ThemedText type="heading">Reglas de convivencia</ThemedText>
+        {COMMUNITY_RULES.map((rule) => (
+          <View key={rule} style={styles.ruleRow}>
+            <Icon sf="checkmark.circle.fill" md="check_circle" size={20} color={theme.accent} />
+            <ThemedText type="small" style={styles.flex}>
+              {rule}
+            </ThemedText>
+          </View>
         ))}
         <ThemedText type="small" themeColor="textSecondary">
           {RULES_FOOTER}
@@ -73,9 +86,9 @@ export default function WelcomeScreen() {
         <View
           style={[
             styles.checkbox,
-            { borderColor: theme.primary, backgroundColor: accepted ? theme.primary : 'transparent' },
+            { borderColor: accepted ? theme.accent : theme.text, backgroundColor: accepted ? theme.accent : 'transparent' },
           ]}>
-          {accepted ? <ThemedText style={{ color: theme.onPrimary }}>✓</ThemedText> : null}
+          {accepted ? <Icon sf="checkmark" md="check" size={18} color={theme.onAccent} /> : null}
         </View>
         <ThemedText type="small" style={styles.flex}>
           Leí y acepto las reglas de convivencia.
@@ -83,16 +96,22 @@ export default function WelcomeScreen() {
       </Pressable>
 
       <Button title="Empezar" onPress={save} disabled={!accepted} loading={isSaving} />
-      <Button title="Salir" variant="secondary" onPress={signOut} />
+      <Button title="Salir" variant="ghost" onPress={signOut} />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   rules: {
+    gap: Spacing.three,
+    padding: Spacing.four,
+    borderRadius: Radius.card,
+    borderWidth: 1.5,
+  },
+  ruleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     gap: Spacing.two,
-    padding: Spacing.three,
-    borderRadius: 12,
   },
   checkRow: {
     flexDirection: 'row',
