@@ -12,10 +12,10 @@ import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { friendlyError, parsePrice } from '@/lib/business';
+import { formatUnitPrice, friendlyError, parsePrice, SALE_UNITS } from '@/lib/business';
 import { publicUrl, removeImage, uploadImage } from '@/lib/media';
 import { supabase } from '@/lib/supabase';
-import type { Product } from '@/lib/types';
+import type { Product, SaleUnit } from '@/lib/types';
 import { useMyBusiness } from '@/providers/my-business';
 
 // Alta y edición de un producto. Sin id en la ruta, es uno nuevo.
@@ -35,6 +35,7 @@ function ProductForm({ businessId, product }: { businessId: string; product: Pro
   const [name, setName] = useState(product?.name ?? '');
   const [description, setDescription] = useState(product?.description ?? '');
   const [price, setPrice] = useState(product ? String(Math.round(product.price)) : '');
+  const [saleUnit, setSaleUnit] = useState<SaleUnit>(product?.sale_unit ?? 'unidad');
   const [categoryId, setCategoryId] = useState<number | null>(product?.category_id ?? null);
   const [isAvailable, setIsAvailable] = useState(product?.is_available ?? true);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
@@ -56,6 +57,7 @@ function ProductForm({ businessId, product }: { businessId: string; product: Pro
         name: name.trim(),
         description: description.trim(),
         price: parsedPrice,
+        sale_unit: saleUnit,
         category_id: categoryId,
         is_available: isAvailable,
         ...(photoPath ? { photo_path: photoPath } : {}),
@@ -125,6 +127,17 @@ function ProductForm({ businessId, product }: { businessId: string; product: Pro
         style={styles.multiline}
       />
       <TextField label="Precio ($)" placeholder="4500" keyboardType="number-pad" value={price} onChangeText={setPrice} />
+      <ChoiceChips
+        label="¿El precio es por…?"
+        options={SALE_UNITS.map((option) => ({ value: option.value, label: option.label }))}
+        value={saleUnit}
+        onChange={setSaleUnit}
+      />
+      {parsePrice(price) ? (
+        <ThemedText type="small" themeColor="textSecondary">
+          El cliente va a ver: {formatUnitPrice(parsePrice(price)!, saleUnit)}
+        </ThemedText>
+      ) : null}
       <ChoiceChips
         label="Categoría"
         options={categories.map((category) => ({ value: category.id, label: category.name }))}

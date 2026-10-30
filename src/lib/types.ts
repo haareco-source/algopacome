@@ -58,6 +58,8 @@ export type DeliverySettings = {
   eta_max_minutes: number;
 };
 
+export type SaleUnit = 'unidad' | 'media_docena' | 'docena' | 'porcion';
+
 export type Category = {
   id: number;
   name: string;
@@ -71,6 +73,7 @@ export type Product = {
   name: string;
   description: string;
   price: number;
+  sale_unit: SaleUnit;
   photo_path: string | null;
   is_available: boolean;
   status: 'active' | 'hidden';
@@ -93,6 +96,7 @@ export type OrderItem = {
   product_id: string | null;
   product_name: string;
   unit_price: number;
+  sale_unit: SaleUnit;
   quantity: number;
   note: string | null;
 };

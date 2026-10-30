@@ -9,7 +9,7 @@ import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { BUSINESS_TYPES, formatPrice, friendlyError } from '@/lib/business';
+import { BUSINESS_TYPES, formatUnitPrice, friendlyError } from '@/lib/business';
 import { publicUrl } from '@/lib/media';
 import { supabase } from '@/lib/supabase';
 import type { Product } from '@/lib/types';
@@ -184,7 +184,7 @@ export default function SellerHomeScreen() {
                   <ThemedText type="small" style={{ color: isHidden ? theme.danger : theme.textSecondary }}>
                     {isHidden
                       ? 'Oculto por moderación'
-                      : `${formatPrice(product.price)}${product.is_available ? '' : ' · Sin stock'}`}
+                      : `${formatUnitPrice(product.price, product.sale_unit)}${product.is_available ? '' : ' · Sin stock'}`}
                   </ThemedText>
                 </View>
                 {!isHidden ? (

@@ -193,3 +193,17 @@ do $$ begin
 end $$;
 
 update public.config set value = '0' where key = 'schedule_max_days';
+
+-- ---------------------------------------------------------------- unidad de venta
+select test.login('vendedor');
+set role authenticated;
+update public.products set sale_unit = 'docena' where id = test.id('milanesa');
+select test.login('cliente');
+insert into test.ids
+select 'docena', public.create_order(test.id('coco'),
+  jsonb_build_array(jsonb_build_object('product_id', test.id('milanesa'), 'quantity', 1)), 'pickup', 'mercadopago');
+do $$ begin
+  assert (select sale_unit from public.order_items where order_id = test.id('docena')) = 'docena', 'el pedido guarda la unidad';
+  assert (select sale_unit from public.search_products('milanesa') limit 1) = 'docena', 'la búsqueda devuelve la unidad';
+end $$;
+reset role;

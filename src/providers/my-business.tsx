@@ -40,7 +40,7 @@ async function loadBusiness(userId: string): Promise<BusinessData> {
   const [productsResult, hoursResult, deliveryResult] = await Promise.all([
     supabase
       .from('products')
-      .select('id, business_id, category_id, name, description, price, photo_path, is_available, status')
+      .select('id, business_id, category_id, name, description, price, sale_unit, photo_path, is_available, status')
       .eq('business_id', business.id)
       .order('created_at'),
     supabase.from('business_hours').select('weekday, opens_at, closes_at').eq('business_id', business.id),

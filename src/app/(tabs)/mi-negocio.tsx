@@ -9,7 +9,7 @@ import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { friendlyError } from '@/lib/business';
+import { friendlyError, nameWithUnit } from '@/lib/business';
 import { isFinished, localDay, minutesLeft, sellerNextStep } from '@/lib/orders';
 import { supabase } from '@/lib/supabase';
 import type { Order } from '@/lib/types';
@@ -50,7 +50,8 @@ export default function SellerOrdersScreen() {
   const totals = new Map<string, number>();
   for (const order of scheduledToday) {
     for (const item of order.order_items) {
-      totals.set(item.product_name, (totals.get(item.product_name) ?? 0) + item.quantity);
+      const name = nameWithUnit(item.product_name, item.sale_unit);
+      totals.set(name, (totals.get(name) ?? 0) + item.quantity);
     }
   }
 

@@ -5,7 +5,7 @@ import { StatusBadge } from '@/components/status-badge';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { formatPrice } from '@/lib/business';
+import { formatPrice, nameWithUnit } from '@/lib/business';
 import { formatDateTime, formatTime } from '@/lib/orders';
 import type { Order } from '@/lib/types';
 
@@ -18,7 +18,7 @@ type OrderCardProps = {
 // Resumen de un pedido para las listas del cliente y del vendedor.
 export function OrderCard({ order, title, footer }: OrderCardProps) {
   const theme = useTheme();
-  const items = order.order_items.map((item) => `${item.quantity} × ${item.product_name}`).join(', ');
+  const items = order.order_items.map((item) => `${item.quantity} × ${nameWithUnit(item.product_name, item.sale_unit)}`).join(', ');
 
   return (
     <View style={[styles.card, { borderColor: theme.border }]}>

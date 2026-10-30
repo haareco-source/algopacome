@@ -10,7 +10,7 @@ import { StatusBadge } from '@/components/status-badge';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { formatPrice, friendlyError } from '@/lib/business';
+import { formatPrice, friendlyError, nameWithUnit } from '@/lib/business';
 import { whatsappLink, type BusinessProfile } from '@/lib/catalog';
 import { confirmAction } from '@/lib/confirm';
 import {
@@ -235,9 +235,9 @@ export default function OrderScreen() {
           <View key={item.id} style={styles.itemRow}>
             <ThemedText type="defaultBold">{item.quantity} ×</ThemedText>
             <View style={styles.flex}>
-              <ThemedText>{item.product_name}</ThemedText>
+              <ThemedText>{nameWithUnit(item.product_name, item.sale_unit)}</ThemedText>
               {item.note ? (
-                <ThemedText type="small" themeColor="textSecondary">
+                <ThemedText type="smallBold" style={{ color: theme.primary }}>
                   {item.note}
                 </ThemedText>
               ) : null}

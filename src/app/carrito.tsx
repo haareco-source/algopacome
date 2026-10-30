@@ -11,11 +11,11 @@ import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { formatPrice, friendlyError } from '@/lib/business';
+import { formatPrice, friendlyError, nameWithUnit } from '@/lib/business';
 import { deliveryFeeFor, formatEta, type BusinessProfile } from '@/lib/catalog';
 import { formatTime } from '@/lib/orders';
 import { supabase } from '@/lib/supabase';
-import { useCart } from '@/providers/cart';
+import { lineKey, useCart } from '@/providers/cart';
 
 type OrderType = 'pickup' | 'delivery';
 type When = 'now' | 'later';
@@ -124,7 +124,7 @@ export default function CartScreen() {
     setIsSending(true);
     const { data, error: rpcError } = await supabase.rpc('create_order', {
       p_business_id: cart.businessId,
-      p_items: cart.items.map((item) => ({ product_id: item.productId, quantity: item.quantity })),
+      p_items: cart.items.map((item) => ({ product_id: item.productId, quantity: item.quantity, note: item.note ?? null })),
       p_type: selectedType,
       p_payment_method: selectedPayment,
       p_scheduled_for: selectedWhen === 'later' ? slot : null,
@@ -185,15 +185,20 @@ export default function CartScreen() {
       <View style={[styles.items, { borderColor: theme.border }]}>
         {cart.items.map((item, index) => (
           <View
-            key={item.productId}
+            key={lineKey(item)}
             style={[styles.item, index > 0 && { borderTopWidth: 1, borderColor: theme.border }]}>
             <View style={styles.flex}>
-              <ThemedText type="defaultBold">{item.name}</ThemedText>
+              <ThemedText type="defaultBold">{nameWithUnit(item.name, item.saleUnit)}</ThemedText>
+              {item.note ? (
+                <ThemedText type="small" style={{ color: theme.primary }}>
+                  {item.note}
+                </ThemedText>
+              ) : null}
               <ThemedText type="small" themeColor="textSecondary">
                 {formatPrice(item.price * item.quantity)}
               </ThemedText>
             </View>
-            <QuantityStepper value={item.quantity} onChange={(quantity) => setQuantity(item.productId, quantity)} />
+            <QuantityStepper value={item.quantity} onChange={(quantity) => setQuantity(lineKey(item), quantity)} />
           </View>
         ))}
       </View>

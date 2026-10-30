@@ -1,5 +1,5 @@
 import type { DeliveryForm } from '@/components/delivery-editor';
-import type { BusinessHour, BusinessType, DeliverySettings } from '@/lib/types';
+import type { BusinessHour, BusinessType, DeliverySettings, SaleUnit } from '@/lib/types';
 
 export const BUSINESS_TYPES: { value: BusinessType; label: string; emoji: string }[] = [
   { value: 'puesto', label: 'Puesto', emoji: '🏕️' },
@@ -66,6 +66,27 @@ export function isValidTaxId(value: string) {
 
 export function formatPrice(value: number) {
   return `$ ${Math.round(value).toLocaleString('es-AR')}`;
+}
+
+// Por qué cantidad es el precio, para que "$ 12.000" no se lea como precio de una empanada.
+export const SALE_UNITS: { value: SaleUnit; label: string; suffix: string }[] = [
+  { value: 'unidad', label: 'Unidad', suffix: 'c/u' },
+  { value: 'media_docena', label: 'Media docena', suffix: 'la media docena' },
+  { value: 'docena', label: 'Docena', suffix: 'la docena' },
+  { value: 'porcion', label: 'Porción', suffix: 'la porción' },
+];
+
+// "$ 12.000 la docena"
+export function formatUnitPrice(value: number, unit: SaleUnit | null | undefined) {
+  const suffix = SALE_UNITS.find((option) => option.value === unit)?.suffix;
+  return suffix ? `${formatPrice(value)} ${suffix}` : formatPrice(value);
+}
+
+// "Empanadas de carne (docena)"; la unidad suelta no se aclara.
+export function nameWithUnit(name: string, unit: SaleUnit | null | undefined) {
+  if (!unit || unit === 'unidad') return name;
+  const label = SALE_UNITS.find((option) => option.value === unit)?.label.toLowerCase();
+  return label ? `${name} (${label})` : name;
 }
 
 // Acepta "4.500", "4500", "4500,50".

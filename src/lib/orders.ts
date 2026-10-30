@@ -1,7 +1,7 @@
 import type { Order, OrderStatus } from '@/lib/types';
 
 export const ORDER_COLUMNS =
-  'id, number, customer_id, business_id, type, delivery_address, contact_phone, subtotal, delivery_fee, total, payment_method, status, notes, eta_minutes, scheduled_for, accept_by, status_changed_at, created_at, order_items (id, product_id, product_name, unit_price, quantity, note)';
+  'id, number, customer_id, business_id, type, delivery_address, contact_phone, subtotal, delivery_fee, total, payment_method, status, notes, eta_minutes, scheduled_for, accept_by, status_changed_at, created_at, order_items (id, product_id, product_name, unit_price, sale_unit, quantity, note)';
 
 export const STATUS_LABELS: Record<OrderStatus, string> = {
   awaiting_payment: 'Esperando el pago',

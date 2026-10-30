@@ -9,17 +9,18 @@ import { Icon } from '@/components/icon';
 import { OpenBadge } from '@/components/open-badge';
 import { QuantityStepper } from '@/components/quantity-stepper';
 import { Screen } from '@/components/screen';
+import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { formatPrice } from '@/lib/business';
+import { formatPrice, formatUnitPrice } from '@/lib/business';
 import type { BusinessProfile } from '@/lib/catalog';
 import { publicUrl } from '@/lib/media';
 import { supabase } from '@/lib/supabase';
 import type { Product } from '@/lib/types';
 import { useCart } from '@/providers/cart';
 
-type ProductDetail = Pick<Product, 'id' | 'business_id' | 'name' | 'description' | 'price' | 'photo_path' | 'is_available'> & {
+type ProductDetail = Pick<Product, 'id' | 'business_id' | 'name' | 'description' | 'price' | 'sale_unit' | 'photo_path' | 'is_available'> & {
   likes: number;
 };
 
@@ -32,12 +33,13 @@ export default function ProductDetailScreen() {
   const [product, setProduct] = useState<ProductDetail | null | undefined>(undefined);
   const [business, setBusiness] = useState<BusinessProfile | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [note, setNote] = useState('');
 
   useEffect(() => {
     let active = true;
     supabase
       .from('products')
-      .select('id, business_id, name, description, price, photo_path, is_available, likes')
+      .select('id, business_id, name, description, price, sale_unit, photo_path, is_available, likes')
       .eq('id', id)
       .eq('status', 'active')
       .maybeSingle<ProductDetail>()
@@ -76,7 +78,14 @@ export default function ProductDetailScreen() {
 
   function addToCart() {
     if (!product || !business) return;
-    const item = { productId: product.id, name: product.name, price: Number(product.price), photoPath: product.photo_path };
+    const item = {
+      productId: product.id,
+      name: product.name,
+      price: Number(product.price),
+      saleUnit: product.sale_unit,
+      note: note.trim() || undefined,
+      photoPath: product.photo_path,
+    };
     const target = { id: business.business_id, name: business.name };
     if (add(target, item, quantity)) {
       router.back();
@@ -125,7 +134,7 @@ export default function ProductDetailScreen() {
       <View style={styles.texts}>
         <ThemedText type="subtitle">{product.name}</ThemedText>
         <ThemedText type="heading" style={{ color: theme.primary }}>
-          {formatPrice(product.price)}
+          {formatUnitPrice(product.price, product.sale_unit)}
         </ThemedText>
         {product.description ? <ThemedText themeColor="textSecondary">{product.description}</ThemedText> : null}
         {product.likes > 0 ? (
@@ -134,6 +143,16 @@ export default function ProductDetailScreen() {
           </ThemedText>
         ) : null}
       </View>
+
+      {product.is_available ? (
+        <TextField
+          label="¿Algún cambio? (opcional)"
+          value={note}
+          onChangeText={setNote}
+          placeholder="Sin mostaza, sin lechuga, bien cocida…"
+          maxLength={140}
+        />
+      ) : null}
 
       {business ? (
         <Pressable
