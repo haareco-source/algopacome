@@ -20,8 +20,8 @@ select public.create_business(
 );
 reset role;
 insert into test.ids select 'pancho_negocio', id from public.businesses where owner_id = test.id('pancho');
-set role authenticated;
 
+-- (como administrador: el hash no se puede leer desde la app)
 do $$ begin
   assert (select slug from public.businesses where id = test.id('pancho_negocio')) = 'el-pancho-feliz', 'slug sin acentos ni signos';
   assert (select status from public.businesses where id = test.id('pancho_negocio')) = 'draft', 'nace en borrador';
@@ -30,6 +30,7 @@ do $$ begin
   assert (select fee from public.delivery_settings where business_id = test.id('pancho_negocio')) = 800, 'carga el delivery';
   assert (select offers_pickup from public.delivery_settings where business_id = test.id('pancho_negocio')), 'retiro por defecto';
 end $$;
+set role authenticated;
 
 -- Segundo negocio del mismo dueño: error claro
 do $$ begin

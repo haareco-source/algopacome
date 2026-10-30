@@ -11,10 +11,12 @@ type ScreenProps = PropsWithChildren<{
   // Portada naranja con el borde inferior redondeado, arriba de todo.
   header?: ReactNode;
   headerMinHeight?: number;
+  // Barra fija abajo (por ejemplo, ver carrito), fuera del scroll.
+  footer?: ReactNode;
 }>;
 
 // Contenedor de pantalla: área segura, scroll, teclado y portada opcional.
-export function Screen({ header, headerMinHeight, children }: ScreenProps) {
+export function Screen({ header, headerMinHeight, footer, children }: ScreenProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -23,7 +25,7 @@ export function Screen({ header, headerMinHeight, children }: ScreenProps) {
       <StatusBar style={header ? 'light' : 'auto'} />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView
-          contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + Spacing.four }]}
+          contentContainerStyle={[styles.scroll, { paddingBottom: footer ? Spacing.four : insets.bottom + Spacing.four }]}
           keyboardShouldPersistTaps="handled">
           {header ? (
             <View
@@ -38,6 +40,15 @@ export function Screen({ header, headerMinHeight, children }: ScreenProps) {
           )}
           <View style={styles.content}>{children}</View>
         </ScrollView>
+        {footer ? (
+          <View
+            style={[
+              styles.footer,
+              { paddingBottom: insets.bottom + Spacing.three, borderColor: theme.border, backgroundColor: theme.background },
+            ]}>
+            {footer}
+          </View>
+        ) : null}
       </KeyboardAvoidingView>
     </ThemedView>
   );
@@ -62,6 +73,11 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
+  },
+  footer: {
+    borderTopWidth: 1,
+    paddingTop: Spacing.three,
+    paddingHorizontal: Spacing.four,
   },
   content: {
     flexGrow: 1,
