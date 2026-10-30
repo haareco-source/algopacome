@@ -42,6 +42,7 @@ function ProductForm({ businessId, product }: { businessId: string; product: Pro
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isHiding, setIsHiding] = useState(false);
 
   async function save() {
     const parsedPrice = parsePrice(price);
@@ -90,6 +91,20 @@ function ProductForm({ businessId, product }: { businessId: string; product: Pro
       return;
     }
     await removeImage('product-photos', product.photo_path);
+    await refresh();
+    router.back();
+  }
+
+  // Ocultarlo libera un lugar del plan sin borrarlo; se vuelve a mostrar desde el panel.
+  async function hide() {
+    if (!product) return;
+    setIsHiding(true);
+    const { error: hideError } = await supabase.from('products').update({ status: 'hidden' }).eq('id', product.id);
+    setIsHiding(false);
+    if (hideError) {
+      setError('No pudimos ocultar el producto. Probá de nuevo.');
+      return;
+    }
     await refresh();
     router.back();
   }
@@ -156,6 +171,9 @@ function ProductForm({ businessId, product }: { businessId: string; product: Pro
         </ThemedText>
       ) : null}
       <Button title={product ? 'Guardar cambios' : 'Agregar producto'} onPress={save} loading={isSaving} />
+      {product?.status === 'active' ? (
+        <Button title="Ocultar del menú (sin borrarlo)" variant="outline" onPress={hide} loading={isHiding} />
+      ) : null}
       {product ? <Button title="Borrar producto" variant="ghost" onPress={confirmRemove} loading={isDeleting} /> : null}
     </Screen>
   );
