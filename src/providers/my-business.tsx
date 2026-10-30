@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type PropsWithChildren } from 'react';
 
+import { useCategories } from '@/hooks/use-categories';
 import { DEFAULT_DELIVERY } from '@/lib/business';
 import { supabase } from '@/lib/supabase';
 import type { Business, BusinessHour, Category, DeliverySettings, Product } from '@/lib/types';
@@ -65,7 +66,7 @@ export function MyBusinessProvider({ children }: PropsWithChildren) {
   const [products, setProducts] = useState<Product[]>([]);
   const [hours, setHours] = useState<BusinessHour[]>([]);
   const [delivery, setDelivery] = useState<DeliverySettings>(DEFAULT_DELIVERY);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const categories = useCategories();
   const [limits, setLimits] = useState({ free: 5, plus: 15 });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -85,13 +86,8 @@ export function MyBusinessProvider({ children }: PropsWithChildren) {
     if (userId) loadBusiness(userId).then(apply);
   }, [userId, apply]);
 
-  // Categorías y límites del plan: cambian poco, se leen una vez.
+  // Los límites del plan cambian poco: se leen una vez.
   useEffect(() => {
-    supabase
-      .from('categories')
-      .select('id, name, sort_order')
-      .order('sort_order')
-      .then(({ data }) => setCategories(data ?? []));
     supabase
       .from('config')
       .select('key, value')
