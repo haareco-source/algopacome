@@ -1,0 +1,32 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://ixmzatjxljemcslmyocf.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_ycIvd3HI-a0afYIaqQffMA_j87ws6a-",
+        "EXPO_PUBLIC_LOGIN_METHOD": "email",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "835264462278-ir2af70vh8vpnqi2kv0c77tc6i7v2rlf.apps.googleusercontent.com"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://ixmzatjxljemcslmyocf.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_ycIvd3HI-a0afYIaqQffMA_j87ws6a-",
+        "EXPO_PUBLIC_LOGIN_METHOD": "email",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "835264462278-ir2af70vh8vpnqi2kv0c77tc6i7v2rlf.apps.googleusercontent.com"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
