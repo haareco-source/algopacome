@@ -96,26 +96,27 @@ export function parsePrice(value: string): number | null {
   return normalized && Number.isFinite(price) && price > 0 ? price : null;
 }
 
-// Estado de atención para el vendedor: distingue "prendido" de "abierto para los clientes".
-export function sellerOpenStatus(business: Pick<Business, 'is_open_now' | 'is_open_for_customers'>, hours: BusinessHour[]) {
-  if (!business.is_open_now) {
-    return { isOpen: false, title: 'Cerrado ahora', detail: 'Prendelo cuando empieces a atender.' };
-  }
-  if (business.is_open_for_customers) {
-    return { isOpen: true, title: 'Abierto ahora', detail: 'Los clientes te ven abierto y pueden pedirte.' };
-  }
+// Estado de atención para el vendedor. El interruptor manda; el horario es la referencia de cada día.
+export function sellerOpenStatus(business: Pick<Business, 'is_open_now'>, hours: BusinessHour[]) {
   // Argentina no tiene horario de verano: el día de hoy es UTC-3.
   const weekday = new Date(Date.now() - 3 * 60 * 60 * 1000).getUTCDay();
   const today = hours
     .filter((hour) => hour.weekday === weekday)
     .map((hour) => `${hour.opens_at.slice(0, 5)} a ${hour.closes_at.slice(0, 5)}`)
     .join(' y ');
+  if (business.is_open_now) {
+    return {
+      isOpen: true,
+      title: 'Abierto ahora',
+      detail: 'Los clientes te ven abierto y pueden pedirte. Apagalo cuando cierres.',
+    };
+  }
   return {
     isOpen: false,
-    title: 'Prendido, pero fuera de horario',
+    title: 'Cerrado ahora',
     detail: today
-      ? `Los clientes te ven cerrado. Hoy atendés de ${today}.`
-      : 'Los clientes te ven cerrado: hoy no tenés horario cargado.',
+      ? `Prendelo cuando empieces a atender. Tu horario de hoy: ${today}.`
+      : 'Prendelo cuando empieces a atender.',
   };
 }
 

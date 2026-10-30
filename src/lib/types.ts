@@ -39,8 +39,6 @@ export type Business = {
   accepts_cash: boolean;
   accepts_scheduled: boolean;
   scheduled_daily_limit: number | null;
-  // Lo que ve el cliente: interruptor prendido y dentro del horario cargado.
-  is_open_for_customers?: boolean;
 };
 
 export type BusinessHour = {

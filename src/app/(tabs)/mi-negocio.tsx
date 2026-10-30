@@ -84,11 +84,7 @@ export default function SellerOrdersScreen() {
               {openStatus.title}
               {business.accepts_scheduled ? ' · Tomás programados' : ''}
             </ThemedText>
-            {business.is_open_now && !openStatus.isOpen ? (
-              <ThemedText type="small" style={{ color: theme.onPrimary }}>
-                {openStatus.detail}
-              </ThemedText>
-            ) : null}
+
           </View>
           <Switch
             accessibilityLabel="Abierto ahora"

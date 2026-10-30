@@ -37,7 +37,7 @@ async function loadBusiness(userId: string): Promise<BusinessData> {
     .maybeSingle();
   if (!business) return { business: null, products: [], hours: [], delivery: DEFAULT_DELIVERY };
 
-  const [productsResult, hoursResult, deliveryResult, openResult] = await Promise.all([
+  const [productsResult, hoursResult, deliveryResult] = await Promise.all([
     supabase
       .from('products')
       .select('id, business_id, category_id, name, description, price, sale_unit, photo_path, is_available, status')
@@ -49,10 +49,9 @@ async function loadBusiness(userId: string): Promise<BusinessData> {
       .select('offers_delivery, offers_pickup, fee_mode, fee, free_over, radius_km, eta_min_minutes, eta_max_minutes')
       .eq('business_id', business.id)
       .maybeSingle(),
-    supabase.rpc('is_business_open', { p_business_id: business.id }),
   ]);
   return {
-    business: { ...business, is_open_for_customers: openResult.data === true },
+    business,
     products: productsResult.data ?? [],
     hours: hoursResult.data ?? [],
     delivery: deliveryResult.data ?? DEFAULT_DELIVERY,

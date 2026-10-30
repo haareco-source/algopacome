@@ -207,3 +207,14 @@ do $$ begin
   assert (select sale_unit from public.search_products('milanesa') limit 1) = 'docena', 'la búsqueda devuelve la unidad';
 end $$;
 reset role;
+
+-- ---------------------------------------------------------------- abierto fuera de horario
+-- Sin horario para hoy, pero con el interruptor prendido: está abierto.
+delete from public.business_hours where business_id = test.id('coco');
+do $$ begin
+  assert public.is_business_open(test.id('coco')), 'el interruptor manda sobre el horario';
+end $$;
+update public.businesses set is_open_now = false where id = test.id('coco');
+do $$ begin
+  assert not public.is_business_open(test.id('coco')), 'apagado está cerrado';
+end $$;

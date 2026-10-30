@@ -130,7 +130,7 @@ export default function SellerHomeScreen() {
 
       {hours.length === 0 ? (
         <ThemedText type="small" style={{ color: theme.danger }}>
-          No tenés horarios cargados: aunque estés abierto, vas a figurar cerrado.
+          No tenés horarios cargados: los clientes no saben cuándo atendés y no podés tomar pedidos programados.
         </ThemedText>
       ) : null}
 
