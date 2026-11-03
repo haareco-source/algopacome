@@ -58,18 +58,24 @@ export default function BillingScreen() {
       setError('No pudimos abrir Mercado Pago. Probá de nuevo.');
       return;
     }
-    await afterMercadoPago(await openMercadoPago(mercadoPagoLinkUrl(data as string)));
-    setBusy(null);
+    try {
+      await afterMercadoPago(await openMercadoPago(mercadoPagoLinkUrl(data as string)));
+    } finally {
+      setBusy(null);
+    }
   }
 
   async function openPayment(route: 'plus' | 'deuda') {
     setError(null);
     setNotice(null);
     setBusy(route === 'plus' ? 'plus' : 'debt');
-    const { url, error: linkError } = await mercadoPagoLink(route);
-    if (url) await afterMercadoPago(await openMercadoPago(url));
-    else setError(linkError);
-    setBusy(null);
+    try {
+      const { url, error: linkError } = await mercadoPagoLink(route);
+      if (url) await afterMercadoPago(await openMercadoPago(url));
+      else setError(linkError);
+    } finally {
+      setBusy(null);
+    }
   }
 
   function confirmCancelPlus() {

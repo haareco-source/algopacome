@@ -1,6 +1,6 @@
 import { FunctionsHttpError } from '@supabase/supabase-js';
 import * as WebBrowser from 'expo-web-browser';
-import { Platform } from 'react-native';
+import { AppState, Platform, type NativeEventSubscription } from 'react-native';
 
 import { supabase } from '@/lib/supabase';
 
@@ -54,8 +54,23 @@ export async function openMercadoPago(url: string) {
     window.open(url, '_blank');
     return null;
   }
-  const result = await WebBrowser.openAuthSessionAsync(url, 'algopacome://');
-  return result.type === 'success' ? result.url : null;
+  // Algunos Android no avisan cuando se cierra el navegador: al volver a la app se da por cerrado.
+  let subscription: NativeEventSubscription | undefined;
+  const backInApp = new Promise<null>((resolve) => {
+    let wentAway = false;
+    subscription = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') wentAway = true;
+      else if (wentAway) resolve(null);
+    });
+  });
+  try {
+    const result = await Promise.race([WebBrowser.openAuthSessionAsync(url, 'algopacome://'), backInApp]);
+    return result?.type === 'success' ? result.url : null;
+  } catch {
+    return null;
+  } finally {
+    subscription?.remove();
+  }
 }
 
 export function mercadoPagoLinkUrl(state: string) {

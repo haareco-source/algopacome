@@ -61,10 +61,13 @@ export default function OrderScreen() {
   const pay = useCallback(async () => {
     setError(null);
     setIsPaying(true);
-    const { url, error: payError } = await mercadoPagoLink('pagar', { order_id: id });
-    if (url) await openMercadoPago(url);
-    else setError(payError);
-    setIsPaying(false);
+    try {
+      const { url, error: payError } = await mercadoPagoLink('pagar', { order_id: id });
+      if (url) await openMercadoPago(url);
+      else setError(payError);
+    } finally {
+      setIsPaying(false);
+    }
     await reload();
   }, [id, reload]);
 
