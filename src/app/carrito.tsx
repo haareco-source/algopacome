@@ -14,6 +14,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { formatPrice, friendlyError, nameWithUnit } from '@/lib/business';
 import { deliveryFeeFor, formatEta, type BusinessProfile } from '@/lib/catalog';
 import { formatTime } from '@/lib/orders';
+import type { PaymentOptions } from '@/lib/payments';
 import { supabase } from '@/lib/supabase';
 import { lineKey, useCart } from '@/providers/cart';
 
@@ -39,6 +40,7 @@ export default function CartScreen() {
   const { cart, subtotal, setQuantity, clear } = useCart();
   const [business, setBusiness] = useState<BusinessProfile | null>(null);
   const [slots, setSlots] = useState<string[]>([]);
+  const [paymentInfo, setPaymentInfo] = useState<PaymentOptions | null>(null);
   const [orderType, setOrderType] = useState<OrderType | null>(null);
   const [when, setWhen] = useState<When | null>(null);
   const [slot, setSlot] = useState<string | null>(null);
@@ -52,6 +54,9 @@ export default function CartScreen() {
   useEffect(() => {
     if (!businessId) return;
     let active = true;
+    supabase.rpc('get_payment_options', { p_business_id: businessId }).then(({ data }) => {
+      if (active) setPaymentInfo((data as PaymentOptions | null) ?? null);
+    });
     supabase
       .rpc('get_business_profile', { p_business_id: businessId })
       .maybeSingle<BusinessProfile>()
@@ -94,10 +99,12 @@ export default function CartScreen() {
   const selectedWhen = when ?? whenOptions[0]?.value ?? null;
 
   const paymentOptions = [
-    { value: 'mercadopago' as const, label: 'Mercado Pago' },
-    ...(business?.accepts_cash && selectedWhen === 'now' ? [{ value: 'cash' as const, label: 'Efectivo' }] : []),
+    ...(paymentInfo?.mercadopago ? [{ value: 'mercadopago' as const, label: 'Mercado Pago' }] : []),
+    ...(paymentInfo?.cash && selectedWhen === 'now' ? [{ value: 'cash' as const, label: 'Efectivo' }] : []),
   ];
-  const selectedPayment = paymentOptions.some((option) => option.value === payment) ? payment : 'mercadopago';
+  const selectedPayment = paymentOptions.some((option) => option.value === payment)
+    ? payment
+    : (paymentOptions[0]?.value ?? null);
 
   const deliveryFee =
     selectedType === 'delivery' && business
@@ -106,17 +113,22 @@ export default function CartScreen() {
   const total = subtotal + deliveryFee;
   const eta = business ? formatEta(business.eta_min_minutes, business.eta_max_minutes) : null;
 
-  const missing = !business
-    ? 'Cargando…'
-    : !selectedWhen
-      ? 'El negocio está cerrado y no toma pedidos programados.'
-      : selectedWhen === 'later' && !slot
-        ? 'Elegí el horario.'
-        : !selectedType
-          ? 'Elegí cómo lo recibís.'
-          : selectedType === 'delivery' && !contact.address.trim()
-            ? 'Falta la dirección de entrega.'
-            : null;
+  const missing =
+    !business || !paymentInfo
+      ? 'Cargando…'
+      : !selectedWhen
+        ? 'El negocio está cerrado y no toma pedidos programados.'
+        : !selectedPayment
+          ? selectedWhen === 'later'
+            ? 'Los pedidos programados se pagan con Mercado Pago, y este negocio todavía no cobra con Mercado Pago.'
+            : 'Este negocio todavía no tiene formas de pago habilitadas.'
+          : selectedWhen === 'later' && !slot
+            ? 'Elegí el horario.'
+            : !selectedType
+              ? 'Elegí cómo lo recibís.'
+              : selectedType === 'delivery' && !contact.address.trim()
+                ? 'Falta la dirección de entrega.'
+                : null;
 
   async function confirm() {
     if (!cart || missing) return;
@@ -143,7 +155,9 @@ export default function CartScreen() {
       } catch {}
     }
     clear();
-    router.replace({ pathname: '/pedido/[id]', params: { id: data as string } });
+    // Con Mercado Pago de verdad, el pedido abre directo la pantalla de pago.
+    const payNow = selectedPayment === 'mercadopago' && !paymentInfo?.simulated;
+    router.replace({ pathname: '/pedido/[id]', params: { id: data as string, ...(payNow ? { pagar: '1' } : {}) } });
   }
 
   return (
@@ -268,10 +282,14 @@ export default function CartScreen() {
         </View>
       ) : null}
 
-      <ChoiceChips label="¿Cómo pagás?" options={paymentOptions} value={selectedPayment} onChange={setPayment} />
+      {paymentOptions.length > 0 && selectedPayment ? (
+        <ChoiceChips label="¿Cómo pagás?" options={paymentOptions} value={selectedPayment} onChange={setPayment} />
+      ) : null}
       {selectedPayment === 'mercadopago' ? (
         <ThemedText type="small" themeColor="textSecondary">
-          Mientras probamos la app el pago es simulado: el pedido se confirma sin cobrarte.
+          {paymentInfo?.simulated
+            ? 'Mientras probamos la app el pago es simulado: el pedido se confirma sin cobrarte.'
+            : 'Al confirmar se abre Mercado Pago para pagar. Si el negocio no acepta el pedido, te devolvemos el dinero.'}
         </ThemedText>
       ) : null}
 

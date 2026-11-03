@@ -65,6 +65,14 @@ export default function SellerHomeScreen() {
     await refresh();
   }
 
+  // Un producto oculto por el plan vuelve a la vista si hay lugar en el límite.
+  async function showProduct(product: Product) {
+    setMessage(null);
+    const { error } = await supabase.from('products').update({ status: 'active' }).eq('id', product.id);
+    if (error) setMessage(friendlyError(error, 'No pudimos mostrar el producto. Probá de nuevo.'));
+    await refresh();
+  }
+
   return (
     <Screen
       header={
@@ -163,6 +171,7 @@ export default function SellerHomeScreen() {
           {products.map((product, index) => {
             const photo = publicUrl('product-photos', product.photo_path);
             const isHidden = product.status === 'hidden';
+            const canShow = isHidden && product.hidden_by_plan;
             return (
               <Pressable
                 key={product.id}
@@ -180,10 +189,12 @@ export default function SellerHomeScreen() {
                   <ThemedText type="defaultBold" numberOfLines={1}>
                     {product.name}
                   </ThemedText>
-                  <ThemedText type="small" style={{ color: isHidden ? theme.danger : theme.textSecondary }}>
-                    {isHidden
-                      ? 'Oculto por moderación'
-                      : `${formatUnitPrice(product.price, product.sale_unit)}${product.is_available ? '' : ' · Sin stock'}`}
+                  <ThemedText type="small" style={{ color: isHidden && !canShow ? theme.danger : theme.textSecondary }}>
+                    {canShow
+                      ? 'Oculto: los clientes no lo ven'
+                      : isHidden
+                        ? 'Oculto por moderación'
+                        : `${formatUnitPrice(product.price, product.sale_unit)}${product.is_available ? '' : ' · Sin stock'}`}
                   </ThemedText>
                 </View>
                 {!isHidden ? (
@@ -193,6 +204,13 @@ export default function SellerHomeScreen() {
                     onValueChange={(value) => toggleAvailable(product, value)}
                     trackColor={{ false: theme.backgroundSelected, true: theme.accent }}
                     thumbColor="#FFFFFF"
+                  />
+                ) : canShow ? (
+                  <Button
+                    title="Mostrar"
+                    variant="outline"
+                    onPress={() => showProduct(product)}
+                    style={styles.showButton}
                   />
                 ) : null}
               </Pressable>
@@ -209,13 +227,20 @@ export default function SellerHomeScreen() {
       />
       {atLimit ? (
         <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
-          Llegaste al límite de {productLimit} productos de tu plan. Muy pronto vas a poder pasarte al plan Plus (hasta
-          15 productos por USD 1 al mes).
+          Llegaste al límite de {productLimit} productos a la vista de tu plan.
+          {business.plan === 'plus' ? '' : ' Con el plan Plus llegás a 15: lo activás en Cobros y plan.'}
         </ThemedText>
       ) : null}
 
       <View style={[styles.list, { borderColor: theme.border }]}>
         <MenuRow sf="pencil" md="edit" title="Datos, fotos y ubicación" onPress={() => router.push('/vender/editar')} />
+        <MenuRow
+          sf="creditcard"
+          md="credit_card"
+          title="Cobros y plan"
+          onPress={() => router.push('/vender/cobros')}
+          bordered
+        />
         <MenuRow
           sf="clock"
           md="schedule"
@@ -235,8 +260,8 @@ function MenuRow({
   onPress,
   bordered,
 }: {
-  sf: 'pencil' | 'clock';
-  md: 'edit' | 'schedule';
+  sf: 'pencil' | 'clock' | 'creditcard';
+  md: 'edit' | 'schedule' | 'credit_card';
   title: string;
   onPress: () => void;
   bordered?: boolean;
@@ -340,6 +365,10 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 12,
     overflow: 'hidden',
+  },
+  showButton: {
+    paddingHorizontal: Spacing.three,
+    minHeight: 36,
   },
   menuRow: {
     flexDirection: 'row',

@@ -57,6 +57,13 @@ supabase/
    (privada) se sube en expo.dev > proyecto > Credentials > Android > FCM V1, nunca al repo. En Supabase tienen que
    estar las extensiones `pg_net` (manda los avisos) y `pg_cron` (vence pedidos cada minuto); la migración de la
    semana 4 intenta activarlas.
+8. Cobros con Mercado Pago: la Edge Function `supabase/functions/mercadopago` se pega en el panel de Supabase
+   (Edge Functions > Deploy a new function > Via Editor, nombre `mercadopago`, sin "Verify JWT"). Sus secretos
+   (`MP_CLIENT_ID`, `MP_CLIENT_SECRET`, `MP_ACCESS_TOKEN`, `TOKEN_KEY`, opcional `MP_WEBHOOK_SECRET` y `MP_TEST`)
+   se cargan en Edge Functions > Secrets, nunca en el repo. En la aplicación de Mercado Pago van la URL de
+   redirección `https://<proyecto>.supabase.co/functions/v1/mercadopago/vincular` y los webhooks a
+   `.../mercadopago/webhook` (pagos y planes y suscripciones). Después, en `config`: `functions_url` con
+   `https://<proyecto>.supabase.co/functions/v1` y `payments_test_mode` en `false`.
 
 Para darle rol de moderador a alguien, en el editor SQL de Supabase:
 
@@ -82,6 +89,8 @@ Comisiones, pedidos gratis, límites de productos, precio del plan Plus, pesos d
 | `commission_launch_pct` | 3 % |
 | `commission_standard_pct` | 5 % (desde `commission_standard_from`) |
 | `free_product_limit` / `plus_product_limit` | 5 / 15 productos |
-| `plus_price_usd` | USD 1 por mes |
+| `plus_price_usd` / `plus_price_ars` | USD 1 por mes, cobrado como $ 1.500 (actualizar a mano) |
+| `payments_test_mode` | `true`: pago simulado hasta configurar Mercado Pago |
+| `cash_debt_limit_ars` | $ 20.000 de comisiones en efectivo antes de pausar el efectivo |
 | `order_accept_minutes` | 10 minutos |
 | `reports_autohide` | 3 denuncias ocultan el contenido |
