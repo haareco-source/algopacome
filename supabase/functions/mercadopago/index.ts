@@ -58,6 +58,13 @@ function backToApp(path: string) {
   );
 }
 
+// Con credenciales de prueba (MP_TEST=true) el cobro se abre en el sandbox de Mercado Pago.
+function checkoutUrl(preference: { init_point: string; sandbox_init_point?: string }) {
+  return Deno.env.get('MP_TEST') === 'true' && preference.sandbox_init_point
+    ? preference.sandbox_init_point
+    : preference.init_point;
+}
+
 // ---------------------------------------------------------------- cifrado de tokens
 
 async function tokenKey() {
@@ -243,7 +250,7 @@ async function pay(req: Request) {
     amount: order.total,
     marketplace_fee: order.commission,
   });
-  return json({ url: preference.init_point });
+  return json({ url: checkoutUrl(preference) });
 }
 
 async function startPlus(req: Request) {
@@ -313,7 +320,7 @@ async function payDebt(req: Request) {
       auto_return: 'approved',
     },
   });
-  return json({ url: preference.init_point });
+  return json({ url: checkoutUrl(preference) });
 }
 
 // Firma de los avisos (si se configuró MP_WEBHOOK_SECRET en el panel de Mercado Pago).
